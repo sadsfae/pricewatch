@@ -107,7 +107,7 @@ def check_volatility(price_history, min_prices, max_prices, target_pct):
     """Check if volatility threshold met.
 
     Returns (triggered, swing_pct) or (False, None).
-     """
+    """
     if not price_history:
         return False, None
 
