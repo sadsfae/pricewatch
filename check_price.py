@@ -85,6 +85,7 @@ def play_alert(wav, player_cmd):
 
 
 def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
+    """Update price history and min/max deques, prune old entries."""
     price_history.append((now, price))
 
     while min_prices and min_prices[-1][1] > price:
