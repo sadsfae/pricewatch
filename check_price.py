@@ -26,6 +26,13 @@ def get_crypto_price(cg_id, session):
         response = session.get(url, params=params, timeout=10)
         response.raise_for_status()
         return response.json()[cg_id]['usd']
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 429:
+            print("Rate-limited by CoinGecko (HTTP 429). "
+                  "Try increasing POLL_INTERVAL.")
+            return None
+        print(f"Fetch failed (HTTPError: {e})")
+        return None
     except (requests.RequestException, KeyError, ValueError) as e:
         print(f"Fetch failed ({type(e).__name__}: {e})")
         return None
@@ -42,6 +49,13 @@ def get_stock_price(symbol, api_key, session):
             print(f"Fetch failed (API status: {status})")
             return None
         return data['last']['price']
+    except requests.exceptions.HTTPError as e:
+        if e.response and e.response.status_code == 429:
+            print("Rate-limited by Polygon (HTTP 429). "
+                  "Try increasing POLL_INTERVAL.")
+            return None
+        print(f"Fetch failed (HTTPError: {e})")
+        return None
     except (requests.RequestException, KeyError, ValueError) as e:
         print(f"Fetch failed ({type(e).__name__}: {e})")
         return None
