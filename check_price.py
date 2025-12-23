@@ -34,10 +34,6 @@ def get_crypto_price(cg_id, session):
         print(f"Fetch failed (HTTPError: {e})")
         return None
     except (requests.RequestException, KeyError, ValueError) as e:
-        if "429" in str(e):
-            print("Rate-limited by CoinGecko (HTTP 429). "
-                  "Try increasing POLL_INTERVAL.")
-            return None
         print(f"Fetch failed ({type(e).__name__}: {e})")
         return None
 
