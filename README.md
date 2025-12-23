@@ -16,10 +16,11 @@ python check_price.py btc above 100000 alert.wav
 python check_price.py eth below 3000 alert.wav
 ```
 
-### Volatility (crypto only)
+### Volatility
 ```
-python check_price.py sol vol 10-5 alert.wav   # 10% move in 5 mins
-python check_price.py doge vol 5-15 alert.wav  # 5% move in 15 mins
+python check_price.py sol vol 10-5 alert.wav    # 10% move in 5 mins
+python check_price.py doge vol 5-15 alert.wav   # 5% move in 15 mins
+python check_price.py tsla vol 5-10 alert.wav   # 5% move in 10 mins (needs POLYGON_API_KEY)
 ```
 
 ### Stocks (needs POLYGON_API_KEY)

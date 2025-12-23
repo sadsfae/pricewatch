@@ -21,8 +21,9 @@ POLL_INTERVAL = 30
 
 def get_crypto_price(cg_id, session):
     try:
-        response = session.get("https://api.coingecko.com/api/v3/simple/price",
-                               params={'ids': cg_id, 'vs_currencies': 'usd'}, timeout=10)
+        url = "https://api.coingecko.com/api/v3/simple/price"
+        params = {'ids': cg_id, 'vs_currencies': 'usd'}
+        response = session.get(url, params=params, timeout=10)
         response.raise_for_status()
         return response.json()[cg_id]['usd']
     except (requests.RequestException, KeyError, ValueError) as e:
@@ -32,12 +33,13 @@ def get_crypto_price(cg_id, session):
 
 def get_stock_price(symbol, api_key, session):
     try:
-        response = session.get(f"https://api.polygon.io/v2/last/trade/{symbol.upper()}",
-                               params={'apiKey': api_key}, timeout=10)
+        url = f"https://api.polygon.io/v2/last/trade/{symbol.upper()}"
+        response = session.get(url, params={'apiKey': api_key}, timeout=10)
         response.raise_for_status()
         data = response.json()
         if data.get('status') != 'success':
-            print(f"Fetch failed (API status: {data.get('status', 'unknown')})")
+            status = data.get('status', 'unknown')
+            print(f"Fetch failed (API status: {status})")
             return None
         return data['last']['price']
     except (requests.RequestException, KeyError, ValueError) as e:
@@ -88,15 +90,12 @@ def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
             max_prices.popleft()
 
 
-def check_volatility(price_history, min_prices, max_prices, time_mins, target_pct):
-    """Check if volatility threshold is met. Returns (triggered, swing_pct) or (False, None)."""
+def check_volatility(price_history, min_prices, max_prices, target_pct):
+    """Check if volatility threshold met.
+
+    Returns (triggered, swing_pct) or (False, None).
+    """
     if not price_history:
-        return False, None
-
-    now = price_history[-1][0]
-    span_mins = (now - price_history[0][0]) / 60.0
-
-    if span_mins < time_mins:
         return False, None
 
     min_price = min_prices[0][1]
@@ -109,10 +108,13 @@ def check_volatility(price_history, min_prices, max_prices, time_mins, target_pc
     return swing_pct >= target_pct, swing_pct
 
 
-def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd, fetch_price):
+def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
+                           fetch_price):
     """Run the volatility monitoring loop."""
     price_history, min_prices, max_prices = deque(), deque(), deque()
     triggered = False
+    warmed_up = False
+    start_time = None
 
     while True:
         price = fetch_price()
@@ -120,26 +122,39 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd, fetch
         time_str = time.strftime('%H:%M:%S')
 
         if price is not None and price > 0:
+            if start_time is None:
+                start_time = now
+
             cutoff = now - (time_mins * 60)
-            update_deques(now, price, price_history, min_prices, max_prices, cutoff)
+            update_deques(now, price, price_history, min_prices,
+                          max_prices, cutoff)
             span_mins = (now - price_history[0][0]) / 60.0
+
+            if not warmed_up and (now - start_time) / 60.0 >= time_mins:
+                warmed_up = True
+                start_time = None
 
             if triggered:
                 print(f"{symbol}: ${price:,.2f} ({time_str})")
-            elif span_mins < time_mins:
+            elif not warmed_up:
                 print(f"{symbol}: ${price:,.2f} (warming up...) ({time_str})")
             else:
                 alert, swing_pct = check_volatility(
-                    price_history, min_prices, max_prices, time_mins, target_pct)
+                    price_history, min_prices, max_prices, target_pct)
                 if alert:
                     min_price, max_price = min_prices[0][1], max_prices[0][1]
-                    print(f"\n!!! {symbol} VOLATILITY: {swing_pct:.2f}% range in {span_mins:.1f}min "
-                          f"(low ${min_price:,.2f}, high ${max_price:,.2f}) !!!")
-                    print(f"   Starting endless alert sound... (stop with: killall {player_cmd[0]})\n")
+                    print(f"\n!!! {symbol} VOLATILITY: {swing_pct:.2f}% "
+                          f"range in {span_mins:.1f}min "
+                          f"(low ${min_price:,.2f}, high ${max_price:,.2f}) "
+                          f"!!!")
+                    print(f"   Starting endless alert sound... "
+                          f"(stop with: killall {player_cmd[0]})\n")
                     play_alert(wav, player_cmd)
                     triggered = True
                 else:
-                    print(f"{symbol}: ${price:,.2f} (range {swing_pct:.2f}% / {time_mins}min) ({time_str})")
+                    print(f"{symbol}: ${price:,.2f} "
+                          f"(range {swing_pct:.2f}% / {time_mins}min) "
+                          f"({time_str})")
 
         time.sleep(POLL_INTERVAL)
 
@@ -155,12 +170,17 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
 
         if price is not None:
             print(f"{symbol}: ${price:,.2f} ({time_str})")
-            if not triggered and crossed_threshold(price, last_price, target, mode == 'above'):
+            crossed = crossed_threshold(price, last_price, target,
+                                        mode == 'above')
+            if not triggered and crossed:
                 if mode == 'above':
-                    print(f"\n!!! {symbol} BROKE ABOVE ${target:,}! Price: ${price:,.2f} !!!")
+                    print(f"\n!!! {symbol} BROKE ABOVE ${target:,}! "
+                          f"Price: ${price:,.2f} !!!")
                 else:
-                    print(f"\n!!! {symbol} DROPPED BELOW ${target:,}! Price: ${price:,.2f} !!!")
-                print(f"   Starting endless alert sound... (stop with: killall {player_cmd[0]})\n")
+                    print(f"\n!!! {symbol} DROPPED BELOW ${target:,}! "
+                          f"Price: ${price:,.2f} !!!")
+                print(f"   Starting endless alert sound... "
+                      f"(stop with: killall {player_cmd[0]})\n")
                 play_alert(wav, player_cmd)
                 triggered = True
             last_price = price
@@ -175,7 +195,7 @@ def parse_args():
         print("Modes:")
         print("  above <price>       Alert when price rises to target")
         print("  below <price>       Alert when price drops to target")
-        print("  vol <pct>-<mins>    Alert on volatility (crypto only)")
+        print("  vol <pct>-<mins>    Alert on volatility")
         print("")
         print("Examples:")
         print("  btc above 100000 alert.wav")
@@ -184,7 +204,10 @@ def parse_args():
         print("  tsla above 400 alert.wav    (needs POLYGON_API_KEY)")
         sys.exit(1)
 
-    symbol, mode, target_str, wav = sys.argv[1], sys.argv[2].lower(), sys.argv[3], sys.argv[4]
+    symbol = sys.argv[1]
+    mode = sys.argv[2].lower()
+    target_str = sys.argv[3]
+    wav = sys.argv[4]
 
     if not os.path.isfile(wav):
         sys.exit(f"WAV not found: {wav}")
@@ -235,18 +258,21 @@ def main():
         print(f"Monitoring {symbol_upper}...")
         if mode == 'vol':
             target_pct, time_mins = target
-            print(f"Alert on ±{target_pct:.1f}% change within {time_mins} minutes")
+            print(f"Alert on ±{target_pct:.1f}% change "
+                  f"within {time_mins} minutes")
         else:
-            direction_word = "above or at" if mode == 'above' else "below or at"
-            print(f"Alert when price goes {direction_word} ${target:,}")
+            direction = "above or at" if mode == 'above' else "below or at"
+            print(f"Alert when price goes {direction} ${target:,}")
         print("Press Ctrl+C to stop monitoring.\n")
 
         try:
             if mode == 'vol':
                 target_pct, time_mins = target
-                run_volatility_monitor(symbol_upper, target_pct, time_mins, wav, player_cmd, fetch_price)
+                run_volatility_monitor(symbol_upper, target_pct, time_mins,
+                                       wav, player_cmd, fetch_price)
             else:
-                run_price_monitor(symbol_upper, mode, target, wav, player_cmd, fetch_price)
+                run_price_monitor(symbol_upper, mode, target, wav,
+                                  player_cmd, fetch_price)
         except KeyboardInterrupt:
             print("\nStopped.")
 
