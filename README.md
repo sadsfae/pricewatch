@@ -2,6 +2,8 @@
 
 Monitors crypto/stock prices and plays an alert sound when target is reached.
 
+[![Flake8 Lint](https://github.com/sadsfae/pricewatch/actions/workflows/flake8.yml/badge.svg)](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/actions/workflows/flake8.yml)
+
 ## Usage
 
 ```
