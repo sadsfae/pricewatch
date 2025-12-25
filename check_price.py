@@ -185,10 +185,19 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
         time_str = time.strftime('%H:%M:%S')
 
         if price is not None:
+            # === IMPROVED: More precise percentage difference ===
             if target > 0:
                 pct_diff = abs(price - target) / target * 100
-                direction = "above" if price >= target else "below"
-                status = f"{pct_diff:.0f}% {direction} target"
+
+                if pct_diff < 0.01:  # Very close
+                    if abs(price - target) < 0.0001:  # Essentially equal
+                        status = "at target"
+                    else:
+                        direction = "above" if price > target else "below"
+                        status = f"<0.01% {direction} target"
+                else:
+                    direction = "above" if price >= target else "below"
+                    status = f"{pct_diff:.2f}% {direction} target"
             else:
                 status = ""
 
