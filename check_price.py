@@ -176,7 +176,8 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
                     price_history, min_prices, max_prices, target_pct)
 
                 if alert:
-                    min_price, max_price = min_prices[0][1], max_prices[0][1]
+                    min_price = min_prices[0][1]
+                    max_price = max_prices[0][1]
                     span_mins = (now - price_history[0][0]) / 60.0
                     print(f"\n{RED}!!! {symbol} VOLATILITY: {swing_pct:.4f}% "
                           f"range in {span_mins:.1f}min "
@@ -210,19 +211,26 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
                 pct_diff = abs(price - target) / target * 100
                 big_arrow = "▲" if price > target else "▼"
                 color = GREEN if price > target else RED
-
-                blink_code = BLINK if blink_state else NO_BLINK
-                blinking_arrow = f"{blink_code}{color}{big_arrow}{RESET}"
-                triple_arrow = blinking_arrow + blinking_arrow + blinking_arrow
-
                 base_arrow = f"{color}{big_arrow}{RESET}"
+
+                if triggered:
+                    blink_code = BLINK if blink_state else NO_BLINK
+                    blinking_arrow = f"{blink_code}{color}{big_arrow}{RESET}"
+                    triple_arrow = (
+                        blinking_arrow + blinking_arrow + blinking_arrow
+                    )
+                else:
+                    triple_arrow = base_arrow + base_arrow + base_arrow
 
                 if pct_diff < 0.01:
                     if abs(price - target) < 0.0001:
                         status = "at target"
                     else:
                         direction = "above" if price > target else "below"
-                        status = f"<0.01% {direction} target {base_arrow}"
+                        status = (
+                            f"{triple_arrow} <0.01% {direction} target "
+                            f"{triple_arrow}"
+                        )
                 else:
                     direction = "above" if price >= target else "below"
                     status = (
