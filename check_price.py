@@ -76,7 +76,6 @@ def get_stock_price(symbol, api_key, session):
 
 
 def crossed_threshold(price, last_price, target, check_above):
-    """Return True if price just crossed the target threshold."""
     if last_price is None:
         return price >= target if check_above else price <= target
     if check_above:
@@ -85,7 +84,6 @@ def crossed_threshold(price, last_price, target, check_above):
 
 
 def get_audio_player():
-    """Return available audio player command, or None if not found."""
     if shutil.which("mpv"):
         return ["mpv", "--loop=inf", "--really-quiet"]
     if shutil.which("mplayer"):
@@ -98,8 +96,22 @@ def play_alert(wav, player_cmd):
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def send_notification(title, message):
+    if shutil.which('notify-send'):
+        subprocess.Popen(['notify-send', title, message],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+    elif shutil.which('osascript'):
+        safe_msg = message.replace('"', '\\"')
+        safe_title = title.replace('"', '\\"')
+        script = (f'display notification "{safe_msg}" '
+                  f'with title "{safe_title}"')
+        subprocess.Popen(['osascript', '-e', script],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+
+
 def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
-    """Update price history and min/max deques, prune old entries."""
     price_history.append((now, price))
 
     while min_prices and min_prices[-1][1] > price:
@@ -119,10 +131,6 @@ def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
 
 
 def check_volatility(price_history, min_prices, max_prices, target_pct):
-    """Check if volatility threshold met.
-
-    Returns (triggered, swing_pct) or (False, None).
-    """
     if len(price_history) < 2:
         return False, 0.0
 
@@ -151,7 +159,6 @@ def get_volatility_bar(pct, target_pct):
 
 def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
                            fetch_price):
-    """Run the volatility monitoring loop."""
     price_history, min_prices, max_prices = deque(), deque(), deque()
     triggered = False
 
@@ -176,14 +183,16 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
                     price_history, min_prices, max_prices, target_pct)
 
                 if alert:
-                    min_price = min_prices[0][1]
-                    max_price = max_prices[0][1]
+                    min_p = min_prices[0][1]
+                    max_p = max_prices[0][1]
                     span_mins = (now - price_history[0][0]) / 60.0
-                    print(f"\n{RED}!!! {symbol} VOLATILITY: {swing_pct:.4f}% "
-                          f"range in {span_mins:.1f}min "
-                          f"(low ${min_price:,.2f}, high ${max_price:,.2f}) "
-                          f"!!!{RESET}")
-                    print(f"   Starting endless alert sound... "
+                    msg = (f"{symbol} VOLATILITY: {swing_pct:.4f}% range "
+                           f"in {span_mins:.1f}min (low ${min_p:,.2f}, "
+                           f"high ${max_p:,.2f})")
+                    print(f"\n{RED}!!! {msg} !!!{RESET}")
+                    send_notification("Price Watch Alert", msg)
+
+                    print(f"    Starting endless alert sound... "
                           f"(stop with: killall {player_cmd[0]})\n")
                     play_alert(wav, player_cmd)
                     triggered = True
@@ -196,7 +205,6 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
 
 
 def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
-    """Run the price threshold monitoring loop."""
     triggered = False
     last_price = None
     blink_state = True
@@ -215,10 +223,8 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
 
                 if triggered:
                     blink_code = BLINK if blink_state else NO_BLINK
-                    blinking_arrow = f"{blink_code}{color}{big_arrow}{RESET}"
-                    triple_arrow = (
-                        blinking_arrow + blinking_arrow + blinking_arrow
-                    )
+                    b_arrow = f"{blink_code}{color}{big_arrow}{RESET}"
+                    triple_arrow = b_arrow + b_arrow + b_arrow
                 else:
                     triple_arrow = base_arrow + base_arrow + base_arrow
 
@@ -246,12 +252,16 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
                                         mode == 'above')
             if not triggered and crossed:
                 if mode == 'above':
-                    print(f"\n!!! {symbol} BROKE ABOVE ${target:,}! "
-                          f"Price: ${price:,.2f} !!!")
+                    msg = (f"{symbol} BROKE ABOVE ${target:,}! "
+                           f"Price: ${price:,.2f}")
+                    print(f"\n!!! {msg} !!!")
                 else:
-                    print(f"\n!!! {symbol} DROPPED BELOW ${target:,}! "
-                          f"Price: ${price:,.2f} !!!")
-                print(f"   Starting endless alert sound... "
+                    msg = (f"{symbol} DROPPED BELOW ${target:,}! "
+                           f"Price: ${price:,.2f}")
+                    print(f"\n!!! {msg} !!!")
+
+                send_notification("Price Watch Alert", msg)
+                print(f"    Starting endless alert sound... "
                       f"(stop with: killall {player_cmd[0]})\n")
                 play_alert(wav, player_cmd)
                 triggered = True
@@ -265,15 +275,15 @@ def parse_args():
         print("Usage: check_price.py <symbol> <mode> <target> <wav>")
         print("")
         print("Modes:")
-        print("  above <price>       Alert when price rises to target")
-        print("  below <price>       Alert when price drops to target")
-        print("  vol <pct>-<mins>    Alert on volatility")
+        print("  above <price>        Alert when price rises to target")
+        print("  below <price>        Alert when price drops to target")
+        print("  vol <pct>-<mins>     Alert on volatility")
         print("")
         print("Examples:")
         print("  btc above 100000 alert.wav")
         print("  eth below 3000 alert.wav")
-        print("  sol vol 0.001-1 alert.wav   (0.001% move in 1 min)")
-        print("  tsla above 400 alert.wav    (needs POLYGON_API_KEY)")
+        print("  sol vol 0.001-1 alert.wav    (0.001% move in 1 min)")
+        print("  tsla above 400 alert.wav     (needs POLYGON_API_KEY)")
         sys.exit(1)
 
     symbol = sys.argv[1]

@@ -1,6 +1,8 @@
 # Price Watch
 
 Monitors crypto/stock prices and plays an alert sound when target is reached.
+   * It will also send an alert on Linux or MAC OSX.
+   * Run via `python` in a terminal or use the optional GUI
 
 [![Flake8 Lint](https://github.com/sadsfae/pricewatch/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/pricewatch/actions/workflows/flake8.yml)
 
