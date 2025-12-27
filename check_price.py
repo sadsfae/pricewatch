@@ -17,8 +17,20 @@ CRYPTO = {
     'LTC': 'litecoin', 'LITECOIN': 'litecoin',
     'ZEC': 'zcash', 'ZCASH': 'zcash',
     'ZAN': 'zano', 'ZANO': 'zano',
+    'XLM': 'stellar', 'STELLAR': 'stellar',
 }
 POLL_INTERVAL = 30
+
+GREEN = '\033[92m'
+RED = '\033[91m'
+YELLOW = '\033[93m'
+RESET = '\033[0m'
+BLINK = '\033[5m'
+NO_BLINK = '\033[25m'
+
+BAR_FULL = '█'
+BAR_EMPTY = '░'
+BAR_WIDTH = 20
 
 
 def get_crypto_price(cg_id, session):
@@ -64,7 +76,6 @@ def get_stock_price(symbol, api_key, session):
 
 
 def crossed_threshold(price, last_price, target, check_above):
-    """Return True if price just crossed the target threshold."""
     if last_price is None:
         return price >= target if check_above else price <= target
     if check_above:
@@ -73,7 +84,6 @@ def crossed_threshold(price, last_price, target, check_above):
 
 
 def get_audio_player():
-    """Return available audio player command, or None if not found."""
     if shutil.which("mpv"):
         return ["mpv", "--loop=inf", "--really-quiet"]
     if shutil.which("mplayer"):
@@ -87,7 +97,6 @@ def play_alert(wav, player_cmd):
 
 
 def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
-    """Update price history and min/max deques, prune old entries."""
     price_history.append((now, price))
 
     while min_prices and min_prices[-1][1] > price:
@@ -107,30 +116,36 @@ def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
 
 
 def check_volatility(price_history, min_prices, max_prices, target_pct):
-    """Check if volatility threshold met.
-
-    Returns (triggered, swing_pct) or (False, None).
-    """
-    if not price_history:
-        return False, None
+    if len(price_history) < 2:
+        return False, 0.0
 
     min_price = min_prices[0][1]
     max_price = max_prices[0][1]
 
     if min_price <= 0:
-        return False, None
+        return False, 0.0
 
     swing_pct = (max_price - min_price) / min_price * 100
     return swing_pct >= target_pct, swing_pct
 
 
+def get_volatility_bar(pct, target_pct):
+    ratio = min(pct / target_pct, 1.0)
+    filled = int(ratio * BAR_WIDTH)
+    bar = BAR_FULL * filled + BAR_EMPTY * (BAR_WIDTH - filled)
+    if pct < target_pct * 0.5:
+        color = GREEN
+    elif pct < target_pct:
+        color = YELLOW
+    else:
+        color = RED
+    return f"{color}{bar}{RESET} {pct:.4f}%"
+
+
 def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
                            fetch_price):
-    """Run the volatility monitoring loop."""
     price_history, min_prices, max_prices = deque(), deque(), deque()
     triggered = False
-    warmed_up = False
-    start_time = None
 
     while True:
         price = fetch_price()
@@ -138,66 +153,73 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
         time_str = time.strftime('%H:%M:%S')
 
         if price is not None and price > 0:
-            if start_time is None:
-                start_time = now
-
             cutoff = now - (time_mins * 60)
             update_deques(now, price, price_history, min_prices,
                           max_prices, cutoff)
-            span_mins = (now - price_history[0][0]) / 60.0
 
-            if not warmed_up and (now - start_time) / 60.0 >= time_mins:
-                warmed_up = True
-                start_time = None
+            has_enough_data = len(price_history) >= 2
 
             if triggered:
                 print(f"{symbol}: ${price:,.2f} ({time_str})")
-            elif not warmed_up:
+            elif not has_enough_data:
                 print(f"{symbol}: ${price:,.2f} (warming up...) ({time_str})")
             else:
                 alert, swing_pct = check_volatility(
                     price_history, min_prices, max_prices, target_pct)
+
                 if alert:
                     min_price, max_price = min_prices[0][1], max_prices[0][1]
-                    print(f"\n!!! {symbol} VOLATILITY: {swing_pct:.2f}% "
+                    span_mins = (now - price_history[0][0]) / 60.0
+                    print(f"\n{RED}!!! {symbol} VOLATILITY: {swing_pct:.4f}% "
                           f"range in {span_mins:.1f}min "
                           f"(low ${min_price:,.2f}, high ${max_price:,.2f}) "
-                          f"!!!")
+                          f"!!!{RESET}")
                     print(f"   Starting endless alert sound... "
                           f"(stop with: killall {player_cmd[0]})\n")
                     play_alert(wav, player_cmd)
                     triggered = True
                 else:
+                    bar = get_volatility_bar(swing_pct, target_pct)
                     print(f"{symbol}: ${price:,.2f} "
-                          f"(range {swing_pct:.2f}% / {time_mins}min) "
-                          f"({time_str})")
+                          f"(vol {bar} / {time_mins}min) ({time_str})")
 
         time.sleep(POLL_INTERVAL)
 
 
 def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
-    """Run the price threshold monitoring loop."""
     triggered = False
     last_price = None
+    blink_state = True
 
     while True:
         price = fetch_price()
         time_str = time.strftime('%H:%M:%S')
+        blink_state = not blink_state
 
         if price is not None:
-            # === IMPROVED: More precise percentage difference ===
             if target > 0:
                 pct_diff = abs(price - target) / target * 100
+                big_arrow = "▲" if price > target else "▼"
+                color = GREEN if price > target else RED
 
-                if pct_diff < 0.01:  # Very close
-                    if abs(price - target) < 0.0001:  # Essentially equal
+                blink_code = BLINK if blink_state else NO_BLINK
+                blinking_arrow = f"{blink_code}{color}{big_arrow}{RESET}"
+                triple_arrow = blinking_arrow + blinking_arrow + blinking_arrow
+
+                base_arrow = f"{color}{big_arrow}{RESET}"
+
+                if pct_diff < 0.01:
+                    if abs(price - target) < 0.0001:
                         status = "at target"
                     else:
                         direction = "above" if price > target else "below"
-                        status = f"<0.01% {direction} target"
+                        status = f"<0.01% {direction} target {base_arrow}"
                 else:
                     direction = "above" if price >= target else "below"
-                    status = f"{pct_diff:.2f}% {direction} target"
+                    status = (
+                        f"{triple_arrow} {pct_diff:.2f}% {direction} "
+                        f"target {triple_arrow}"
+                    )
             else:
                 status = ""
 
@@ -233,7 +255,7 @@ def parse_args():
         print("Examples:")
         print("  btc above 100000 alert.wav")
         print("  eth below 3000 alert.wav")
-        print("  sol vol 10-5 alert.wav      (10% move in 5 mins)")
+        print("  sol vol 0.001-1 alert.wav   (0.001% move in 1 min)")
         print("  tsla above 400 alert.wav    (needs POLYGON_API_KEY)")
         sys.exit(1)
 
@@ -247,10 +269,11 @@ def parse_args():
 
     if mode == 'vol':
         if '-' not in target_str:
-            sys.exit("Volatility format: <percent>-<minutes> (e.g., 10-5)")
+            sys.exit("Volatility format: <percent>-<minutes> (e.g., 0.001-1)")
         try:
             pct_str, mins_str = target_str.split('-', 1)
-            target_pct, time_mins = float(pct_str), int(mins_str)
+            target_pct = float(pct_str)
+            time_mins = int(mins_str)
         except ValueError:
             sys.exit("Invalid vol format: must be number-number")
         if target_pct <= 0 or time_mins <= 0:
@@ -291,8 +314,8 @@ def main():
         print(f"Monitoring {symbol_upper}...")
         if mode == 'vol':
             target_pct, time_mins = target
-            print(f"Alert on ±{target_pct:.1f}% change "
-                  f"within {time_mins} minutes")
+            print(f"Alert on ±{target_pct:.4f}% change "
+                  f"within {time_mins} minute{'s' if time_mins != 1 else ''}")
         else:
             direction = "above or at" if mode == 'above' else "below or at"
             print(f"Alert when price goes {direction} ${target:,}")
