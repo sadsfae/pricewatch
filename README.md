@@ -31,15 +31,15 @@ python check_price.py tsla above 400 alert.wav
 
 Get a free key at https://polygon.io
 
+## Requirements
+- Python 3 with `requests`
+- mpv or mplayer
+
 ### GUI
 To run the GUI:
 ```
 python pricewatch_gui.py
 ```
-
-## Requirements
-- Python 3 with `requests`
-- mpv or mplayer
 
 ## Installation
 ### Clone Repository
