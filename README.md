@@ -31,6 +31,52 @@ python check_price.py tsla above 400 alert.wav
 
 Get a free key at https://polygon.io
 
+### GUI
+To run the GUI:
+```
+python pricewatch_gui.py
+```
+
 ## Requirements
 - Python 3 with `requests`
 - mpv or mplayer
+
+## Installation
+### Clone Repository
+```bash
+git clone https://github.com/sadsfae/pricewatch.git
+cd pricewatch
+```
+
+### Copy .desktop file (optional)
+```bash
+cat > pricewatch.desktop <<EOF
+[Desktop Entry]
+Version=1.0
+Name=Price Watch
+Comment=Monitor crypto and stock prices
+Exec=$(which python3) $(pwd)/pricewatch_gui.py
+Path=$(pwd)/
+Icon=utilities-system-monitor
+Terminal=false
+Type=Application
+Categories=Utility;Finance;
+EOF
+```
+
+### Install it to your local applications folder (optional)
+```bash
+mkdir -p ~/.local/share/applications/
+mv pricewatch.desktop ~/.local/share/applications/
+chmod +x ~/.local/share/applications/pricewatch.desktop
+update-desktop-database ~/.local/share/applications/
+```
+
+## Screenshots
+### CLI
+![Pricewatch Mon](image/monitor_price.png)
+
+![Pricewatch Vol](image/monitor_vol.png)
+
+### GUI
+![Pricewatch GUI](image/monitor_gui.png)
