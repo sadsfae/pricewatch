@@ -7,6 +7,7 @@ import sys
 import queue
 import re
 import signal
+import shutil
 
 
 class PricewatchGUI:
@@ -143,11 +144,24 @@ class PricewatchGUI:
         ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
         return ansi_escape.sub('', text)
 
+    def send_notification(self, title, message):
+        """Send a desktop notification using notify-send if available."""
+        if shutil.which('notify-send'):
+            try:
+                subprocess.Popen(['notify-send', title, message])
+            except Exception:
+                pass  # Fail silently if notification system is broken
+
     def check_queue(self):
         try:
             while True:
                 message = self.log_queue.get_nowait()
                 clean_message = self.strip_ansi(message)
+
+                # Check for alert trigger in output
+                if "!!!" in clean_message:
+                    self.send_notification("Price Watch Alert", clean_message)
+
                 self.console.config(state='normal')
                 self.console.insert(tk.END, clean_message + "\n")
                 self.console.see(tk.END)
