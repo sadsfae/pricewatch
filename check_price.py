@@ -7,6 +7,8 @@ from collections import deque
 import threading
 import json
 import requests
+import datetime
+import pytz
 
 CRYPTO = {
     'BTC': 'bitcoin', 'BITCOIN': 'bitcoin',
@@ -37,6 +39,8 @@ BAR_WIDTH = 20
 current_price = None
 price_lock = threading.Lock()
 ws_thread = None
+api_key = None
+finnhub_symbol = None
 
 
 def get_crypto_price_coingecko(cg_id):
@@ -48,6 +52,36 @@ def get_crypto_price_coingecko(cg_id):
         return response.json()[cg_id]['usd']
     except Exception:
         return None
+
+
+def get_fallback_quote():
+    try:
+        url = "https://finnhub.io/api/v1/quote"
+        params = {'symbol': finnhub_symbol, 'token': api_key}
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        return data.get('c') or data.get('pc')
+    except Exception:
+        return None
+
+
+def hours_until_market_open():
+    eastern = pytz.timezone('US/Eastern')
+    now = datetime.datetime.now(eastern)
+    weekday = now.weekday()
+    if weekday >= 5:
+        days_ahead = 7 - weekday
+    else:
+        days_ahead = 0
+    next_open = (now.date() + datetime.timedelta(days=days_ahead))
+    if now.time() >= datetime.time(9, 30):
+        next_open += datetime.timedelta(days=1)
+    open_dt = datetime.datetime.combine(next_open, datetime.time(9, 30))
+    open_dt = eastern.localize(open_dt)
+    delta = open_dt - now
+    hours = delta.total_seconds() / 3600
+    return round(hours, 1)
 
 
 def on_message(ws, message):
@@ -71,10 +105,10 @@ def on_open(ws, symbol):
     ws.send(json.dumps({"type": "subscribe", "symbol": symbol}))
 
 
-def start_websocket(symbol, api_key):
+def start_websocket(symbol, key):
     import websocket
     global ws_thread
-    ws_url = f"wss://ws.finnhub.io?token={api_key}"
+    ws_url = f"wss://ws.finnhub.io?token={key}"
     ws = websocket.WebSocketApp(ws_url,
                                 on_open=lambda ws: on_open(ws, symbol),
                                 on_message=on_message,
@@ -87,7 +121,9 @@ def start_websocket(symbol, api_key):
 
 def get_price():
     with price_lock:
-        return current_price
+        if current_price is not None:
+            return current_price
+    return get_fallback_quote()
 
 
 def crossed_threshold(price, last_price, target, check_above):
@@ -226,7 +262,9 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
                           f"(vol {bar} / {time_mins}min) ({time_str})")
 
         else:
-            print(f"{symbol}: No price data yet ({time_str})")
+            hours = hours_until_market_open()
+            print(
+                f"{symbol}: Market closed, ~{hours}h until open ({time_str})")
 
         time.sleep(POLL_INTERVAL)
 
@@ -296,7 +334,9 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
             last_price = price
 
         else:
-            print(f"{symbol}: No price data yet ({time_str})")
+            hours = hours_until_market_open()
+            print(
+                f"{symbol}: Market closed, ~{hours}h until open ({time_str})")
 
         time.sleep(POLL_INTERVAL)
 
@@ -347,6 +387,7 @@ def parse_args():
 
 
 def main():
+    global api_key, finnhub_symbol, current_price
     player_cmd = get_audio_player()
     if not player_cmd:
         sys.exit("Error: mpv or mplayer not found in PATH")
@@ -365,12 +406,13 @@ def main():
 
         finnhub_symbol = symbol_upper
 
-        global current_price
         current_price = None
 
         start_websocket(finnhub_symbol, api_key)
 
         time.sleep(2)
+
+        current_price = get_price()
 
         def fetch_price():
             return get_price()
