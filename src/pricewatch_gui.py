@@ -180,7 +180,7 @@ class PricewatchGUI:
         wav = self.wav_var.get()
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, "src/pricewatch.py")
+        script_path = os.path.join(script_dir, "pricewatch.py")
 
         if not os.path.exists(script_path):
             messagebox.showerror("Error", f"Script not found: {script_path}")
