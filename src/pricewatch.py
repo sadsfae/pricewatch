@@ -343,7 +343,7 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
 
 def parse_args():
     if len(sys.argv) != 5:
-        print("Usage: check_price.py <symbol> <mode> <target> <wav>")
+        print("Usage: pricewatch.py <symbol> <mode> <target> <wav>")
         print("")
         print("Modes:")
         print("  above <price>        Alert when price rises to target")

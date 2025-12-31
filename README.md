@@ -14,27 +14,27 @@ Monitors crypto/stock prices & volatility and plays an alert sound when target i
 ## Usage
 
 ```
-python check_price.py <symbol> <mode> <target> <wav>
+python pricewatch.py <symbol> <mode> <target> <wav>
 ```
 
 ### Price targets
 ```
-python check_price.py btc above 100000 alert.wav
-python check_price.py eth below 3000 alert.wav
+python pricewatch.py btc above 100000 alert.wav
+python pricewatch.py eth below 3000 alert.wav
 ```
 
 ### Volatility
 ```
-python check_price.py sol vol 10-5 alert.wav    # 10% move in 5 mins
-python check_price.py doge vol 5-15 alert.wav   # 5% move in 15 mins
-python check_price.py tsla vol 5-10 alert.wav   # 5% move in 10 mins (needs FINNHUB_API_KEY)
+python pricewatch.py sol vol 10-5 alert.wav    # 10% move in 5 mins
+python pricewatch.py doge vol 5-15 alert.wav   # 5% move in 15 mins
+python pricewatch.py tsla vol 5-10 alert.wav   # 5% move in 10 mins (needs FINNHUB_API_KEY)
 ```
 
 ### Stocks
 * Requires a [Finnhub](https://finnhub.io/register) API key (Free, email signup only)
 ```bash
 export FINNHUB_API_KEY="your_key_here"
-python check_price.py tsla above 400 alert.wav
+python pricewatch.py tsla above 400 alert.wav
 ```
 
 ## Requirements
@@ -52,7 +52,7 @@ python pricewatch_gui.py
 ### Clone Repository
 ```bash
 git clone https://github.com/sadsfae/pricewatch.git
-cd pricewatch
+cd pricewatch/src
 ```
 
 ### Copy .desktop file (optional GUI)

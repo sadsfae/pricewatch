@@ -150,7 +150,7 @@ class PricewatchGUI:
             try:
                 subprocess.Popen(['notify-send', title, message])
             except Exception:
-                pass  # Fail silently if notification system is broken
+                pass
 
     def check_queue(self):
         try:
@@ -158,7 +158,6 @@ class PricewatchGUI:
                 message = self.log_queue.get_nowait()
                 clean_message = self.strip_ansi(message)
 
-                # Check for alert trigger in output
                 if "!!!" in clean_message:
                     self.send_notification("Price Watch Alert", clean_message)
 
@@ -181,7 +180,7 @@ class PricewatchGUI:
         wav = self.wav_var.get()
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, "check_price.py")
+        script_path = os.path.join(script_dir, "src/pricewatch.py")
 
         if not os.path.exists(script_path):
             messagebox.showerror("Error", f"Script not found: {script_path}")
