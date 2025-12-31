@@ -7,9 +7,11 @@ Monitors crypto/stock prices & volatility and plays an alert sound when target i
 * Run via `python` in a terminal or use the optional GUI
 
 > [!NOTE]
-> Crypto prices utilize CoinGecko open API.
->
 > Stock prices utilize [Finnhub](https://finnhub.io/register) free API (email sign-up required)
+>
+> Crypto prices utilize CoinGecko open API but may be rate limited occasionally.
+>
+> (optional) If you want to use a CoinGecko API key use `export COINGECKO_API_KEY="your_API_key"`
 
 ## Usage
 

@@ -44,9 +44,12 @@ finnhub_symbol = None
 
 
 def get_crypto_price_coingecko(cg_id):
+    cg_key = os.getenv('COINGECKO_API_KEY')
     try:
         url = "https://api.coingecko.com/api/v3/simple/price"
         params = {'ids': cg_id, 'vs_currencies': 'usd'}
+        if cg_key:
+            params['x_cg_demo_api_key'] = cg_key
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         return response.json()[cg_id]['usd']
@@ -107,13 +110,15 @@ def on_open(ws, symbol):
 
 def start_websocket(symbol, key):
     import websocket
-    global ws_thread
     ws_url = f"wss://ws.finnhub.io?token={key}"
-    ws = websocket.WebSocketApp(ws_url,
-                                on_open=lambda ws: on_open(ws, symbol),
-                                on_message=on_message,
-                                on_error=on_error,
-                                on_close=on_close)
+    ws = websocket.WebSocketApp(
+        ws_url,
+        on_open=lambda ws: on_open(ws, symbol),
+        on_message=on_message,
+        on_error=on_error,
+        on_close=on_close
+    )
+    global ws_thread
     ws_thread = threading.Thread(target=ws.run_forever)
     ws_thread.daemon = True
     ws_thread.start()
@@ -127,7 +132,6 @@ def get_price():
 
 
 def crossed_threshold(price, last_price, target, check_above):
-    """Return True if price just crossed the target threshold."""
     if last_price is None:
         return price >= target if check_above else price <= target
     if check_above:
@@ -136,7 +140,6 @@ def crossed_threshold(price, last_price, target, check_above):
 
 
 def get_audio_player():
-    """Return available audio player command, or None if not found."""
     if shutil.which("mpv"):
         return ["mpv", "--loop=inf", "--really-quiet"]
     if shutil.which("mplayer"):
@@ -145,28 +148,35 @@ def get_audio_player():
 
 
 def play_alert(wav, player_cmd):
-    subprocess.Popen(player_cmd + [wav],
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen(
+        player_cmd + [wav],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
 
 
 def send_notification(title, message):
-    """Send a desktop notification using notify-send or osascript."""
     if shutil.which('notify-send'):
-        subprocess.Popen(['notify-send', title, message],
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
+        subprocess.Popen(
+            ['notify-send', title, message],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
     elif shutil.which('osascript'):
         safe_msg = message.replace('"', '\\"')
         safe_title = title.replace('"', '\\"')
-        script = (f'display notification "{safe_msg}" '
-                  f'with title "{safe_title}"')
-        subprocess.Popen(['osascript', '-e', script],
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
+        script = (
+            f'display notification "{safe_msg}" '
+            f'with title "{safe_title}"'
+        )
+        subprocess.Popen(
+            ['osascript', '-e', script],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
 
 def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
-    """Update price history and min/max deques, prune old entries."""
     price_history.append((now, price))
 
     while min_prices and min_prices[-1][1] > price:
@@ -186,10 +196,6 @@ def update_deques(now, price, price_history, min_prices, max_prices, cutoff):
 
 
 def check_volatility(price_history, min_prices, max_prices, target_pct):
-    """Check if volatility threshold met.
-
-    Returns (triggered, swing_pct) or (False, None).
-    """
     if len(price_history) < 2:
         return False, 0.0
 
@@ -216,9 +222,15 @@ def get_volatility_bar(pct, target_pct):
     return f"{color}{bar}{RESET} {pct:.4f}%"
 
 
-def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
-                           fetch_price):
-    """Run the volatility monitoring loop."""
+def run_volatility_monitor(
+    symbol,
+    target_pct,
+    time_mins,
+    wav,
+    player_cmd,
+    fetch_price,
+    is_crypto=False
+):
     price_history, min_prices, max_prices = deque(), deque(), deque()
     triggered = False
 
@@ -229,48 +241,77 @@ def run_volatility_monitor(symbol, target_pct, time_mins, wav, player_cmd,
 
         if price is not None and price > 0:
             cutoff = now - (time_mins * 60)
-            update_deques(now, price, price_history, min_prices,
-                          max_prices, cutoff)
+            update_deques(
+                now,
+                price,
+                price_history,
+                min_prices,
+                max_prices,
+                cutoff
+            )
 
             has_enough_data = len(price_history) >= 2
 
             if triggered:
                 print(f"{symbol}: ${price:,.2f} ({time_str})")
             elif not has_enough_data:
-                print(f"{symbol}: ${price:,.2f} (warming up...) ({time_str})")
+                print(
+                    f"{symbol}: ${price:,.2f} (warming up...) ({time_str})"
+                )
             else:
                 alert, swing_pct = check_volatility(
-                    price_history, min_prices, max_prices, target_pct)
+                    price_history,
+                    min_prices,
+                    max_prices,
+                    target_pct
+                )
 
                 if alert:
                     min_p = min_prices[0][1]
                     max_p = max_prices[0][1]
                     span_mins = (now - price_history[0][0]) / 60.0
-                    msg = (f"{symbol} VOLATILITY: {swing_pct:.4f}% range "
-                           f"in {span_mins:.1f}min (low ${min_p:,.2f}, "
-                           f"high ${max_p:,.2f})")
+                    msg = (
+                        f"{symbol} VOLATILITY: {swing_pct:.4f}% range "
+                        f"in {span_mins:.1f}min (low ${min_p:,.2f}, "
+                        f"high ${max_p:,.2f})"
+                    )
                     print(f"\n{RED}!!! {msg} !!!{RESET}")
                     send_notification("Price Watch Alert", msg)
 
-                    print(f"    Starting endless alert sound... "
-                          f"(stop with: killall {player_cmd[0]})\n")
+                    print(
+                        f"    Starting endless alert sound... "
+                        f"(stop with: killall {player_cmd[0]})\n"
+                    )
                     play_alert(wav, player_cmd)
                     triggered = True
                 else:
                     bar = get_volatility_bar(swing_pct, target_pct)
-                    print(f"{symbol}: ${price:,.2f} "
-                          f"(vol {bar} / {time_mins}min) ({time_str})")
-
+                    print(
+                        f"{symbol}: ${price:,.2f} "
+                        f"(vol {bar} / {time_mins}min) ({time_str})"
+                    )
         else:
-            hours = hours_until_market_open()
-            print(
-                f"{symbol}: Market closed, ~{hours}h until open ({time_str})")
+            if not is_crypto:
+                hours = hours_until_market_open()
+                print(
+                    f"{symbol}: Market closed, "
+                    f"~{hours}h until open ({time_str})"
+                )
+            else:
+                print(f"{symbol}: Failed to fetch price ({time_str})")
 
         time.sleep(POLL_INTERVAL)
 
 
-def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
-    """Run the price threshold monitoring loop."""
+def run_price_monitor(
+    symbol,
+    mode,
+    target,
+    wav,
+    player_cmd,
+    fetch_price,
+    is_crypto=False
+):
     triggered = False
     last_price = None
     blink_state = True
@@ -314,29 +355,44 @@ def run_price_monitor(symbol, mode, target, wav, player_cmd, fetch_price):
 
             print(f"{symbol}: ${price:,.2f} ({time_str}) {status}")
 
-            crossed = crossed_threshold(price, last_price, target,
-                                        mode == 'above')
+            crossed = crossed_threshold(
+                price,
+                last_price,
+                target,
+                mode == 'above'
+            )
             if not triggered and crossed:
                 if mode == 'above':
-                    msg = (f"{symbol} BROKE ABOVE ${target:,}! "
-                           f"Price: ${price:,.2f}")
+                    msg = (
+                        f"{symbol} BROKE ABOVE ${target:,}! "
+                        f"Price: ${price:,.2f}"
+                    )
                     print(f"\n!!! {msg} !!!")
                 else:
-                    msg = (f"{symbol} DROPPED BELOW ${target:,}! "
-                           f"Price: ${price:,.2f}")
+                    msg = (
+                        f"{symbol} DROPPED BELOW ${target:,}! "
+                        f"Price: ${price:,.2f}"
+                    )
                     print(f"\n!!! {msg} !!!")
 
                 send_notification("Price Watch Alert", msg)
-                print(f"    Starting endless alert sound... "
-                      f"(stop with: killall {player_cmd[0]})\n")
+                print(
+                    f"    Starting endless alert sound... "
+                    f"(stop with: killall {player_cmd[0]})\n"
+                )
                 play_alert(wav, player_cmd)
                 triggered = True
             last_price = price
 
         else:
-            hours = hours_until_market_open()
-            print(
-                f"{symbol}: Market closed, ~{hours}h until open ({time_str})")
+            if not is_crypto:
+                hours = hours_until_market_open()
+                print(
+                    f"{symbol}: Market closed, "
+                    f"~{hours}h until open ({time_str})"
+                )
+            else:
+                print(f"{symbol}: Failed to fetch price ({time_str})")
 
         time.sleep(POLL_INTERVAL)
 
@@ -366,7 +422,9 @@ def parse_args():
 
     if mode == 'vol':
         if '-' not in target_str:
-            sys.exit("Volatility format: <percent>-<minutes> (e.g., 0.001-1)")
+            sys.exit(
+                "Volatility format: <percent>-<minutes> (e.g., 0.001-1)"
+            )
         try:
             pct_str, mins_str = target_str.split('-', 1)
             target_pct = float(pct_str)
@@ -395,8 +453,9 @@ def main():
     symbol, mode, target, wav = parse_args()
     symbol_upper = symbol.upper()
     cg_id = CRYPTO.get(symbol_upper)
+    is_crypto = bool(cg_id)
 
-    if cg_id:
+    if is_crypto:
         def fetch_price():
             return get_crypto_price_coingecko(cg_id)
     else:
@@ -420,8 +479,10 @@ def main():
     print(f"Monitoring {symbol_upper}...")
     if mode == 'vol':
         target_pct, time_mins = target
-        print(f"Alert on ±{target_pct:.4f}% change "
-              f"within {time_mins} minute{'s' if time_mins != 1 else ''}")
+        print(
+            f"Alert on ±{target_pct:.4f}% change "
+            f"within {time_mins} minute{'s' if time_mins != 1 else ''}"
+        )
     else:
         direction = "above or at" if mode == 'above' else "below or at"
         print(f"Alert when price goes {direction} ${target:,}")
@@ -430,11 +491,25 @@ def main():
     try:
         if mode == 'vol':
             target_pct, time_mins = target
-            run_volatility_monitor(symbol_upper, target_pct, time_mins,
-                                   wav, player_cmd, fetch_price)
+            run_volatility_monitor(
+                symbol_upper,
+                target_pct,
+                time_mins,
+                wav,
+                player_cmd,
+                fetch_price,
+                is_crypto
+            )
         else:
-            run_price_monitor(symbol_upper, mode, target, wav,
-                              player_cmd, fetch_price)
+            run_price_monitor(
+                symbol_upper,
+                mode,
+                target,
+                wav,
+                player_cmd,
+                fetch_price,
+                is_crypto
+            )
     except KeyboardInterrupt:
         print("\nStopped.")
 
