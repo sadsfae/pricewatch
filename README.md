@@ -40,8 +40,10 @@ python pricewatch.py tsla above 400 alert.wav
 ```
 
 ## Requirements
-- Python 3 with `requests` or `python3-requests`
-- Python 3 with `websockets` or `python3-websockets` (Stocks only)
+- Python 3 with these libraries:
+   * `requests` or `python3-requests`
+   * `pytz` or `python3-pytz`
+   * `websockets` or `python3-websockets` (Stocks only)
 - mpv or mplayer
 
 ### GUI
