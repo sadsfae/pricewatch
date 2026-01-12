@@ -8,7 +8,6 @@ import threading
 import json
 import requests
 import datetime
-import pytz
 
 CRYPTO = {
     'BTC': 'bitcoin', 'BITCOIN': 'bitcoin',
@@ -70,6 +69,7 @@ def get_fallback_quote():
 
 
 def hours_until_market_open():
+    import pytz
     eastern = pytz.timezone('US/Eastern')
     now = datetime.datetime.now(eastern)
     weekday = now.weekday()
