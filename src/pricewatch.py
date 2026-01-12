@@ -8,7 +8,6 @@ import threading
 import json
 import requests
 import datetime
-import pytz
 
 CRYPTO = {
     'BTC': 'bitcoin', 'BITCOIN': 'bitcoin',
@@ -110,6 +109,7 @@ def on_open(ws, symbol):
 
 def start_websocket(symbol, key):
     import websocket
+    import pytz
     ws_url = f"wss://ws.finnhub.io?token={key}"
     ws = websocket.WebSocketApp(
         ws_url,
