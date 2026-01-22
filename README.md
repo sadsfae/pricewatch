@@ -4,7 +4,7 @@
 
 Monitors crypto/stock prices & volatility and plays an alert sound when target is reached.
 * It will also send a desktop notification on Linux or MAC OSX.
-* Run via `python` in a terminal or use the optional GUI
+* Run via `python` in a terminal or use the optional GUI.
 
 > [!NOTE]
 > Stock prices utilize [Finnhub](https://finnhub.io/register) free API (email sign-up required)
