@@ -1,12 +1,25 @@
 # CHANGELOG
 
 
+## v0.1.6 (2026-01-22)
+
+### Bug Fixes
+
+- Sync git tags to trigger release
+  ([`54f7a6c`](https://github.com/sadsfae/goldteeth/commit/54f7a6cce0f4bfddecc7068c3bf0d01c5d17feb8))
+
+
 ## v0.1.5 (2026-01-22)
 
 ### Bug Fixes
 
 - Sync git tags to trigger release
   ([`0c2b230`](https://github.com/sadsfae/goldteeth/commit/0c2b23092b45d4649533e1dbed77e0a11fd44caa))
+
+### Chores
+
+- **release**: V0.1.5 [skip ci]
+  ([`2a0b7d8`](https://github.com/sadsfae/goldteeth/commit/2a0b7d8d64b3290ad123d2b0d3660af20fc3a224))
 
 
 ## v0.1.4 (2026-01-22)
