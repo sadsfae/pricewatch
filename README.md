@@ -1,6 +1,6 @@
-# Price Watch
+# Price Watcher
 
-[![Flake8 Lint](https://github.com/sadsfae/pricewatch/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/pricewatch/actions/workflows/flake8.yml)
+[![Flake8 Lint](https://github.com/sadsfae/pricewatcher/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/pricewatcher/actions/workflows/flake8.yml)
 
 Monitors crypto/stock prices & volatility and plays an alert sound when target is reached.
 * It will also send a desktop notification on Linux or MAC OSX.
@@ -16,27 +16,27 @@ Monitors crypto/stock prices & volatility and plays an alert sound when target i
 ## Usage
 
 ```
-python pricewatch.py <symbol> <mode> <target> <wav>
+python pricewatcher.py <symbol> <mode> <target> <wav>
 ```
 
 ### Price targets
 ```
-python pricewatch.py btc above 100000 alert.wav
-python pricewatch.py eth below 3000 alert.wav
+python pricewatcher.py btc above 100000 alert.wav
+python pricewatcher.py eth below 3000 alert.wav
 ```
 
 ### Volatility
 ```
-python pricewatch.py sol vol 10-5 alert.wav    # 10% move in 5 mins
-python pricewatch.py doge vol 5-15 alert.wav   # 5% move in 15 mins
-python pricewatch.py tsla vol 5-10 alert.wav   # 5% move in 10 mins (needs FINNHUB_API_KEY)
+python pricewatcher.py sol vol 10-5 alert.wav    # 10% move in 5 mins
+python pricewatcher.py doge vol 5-15 alert.wav   # 5% move in 15 mins
+python pricewatcher.py tsla vol 5-10 alert.wav   # 5% move in 10 mins (needs FINNHUB_API_KEY)
 ```
 
 ### Stocks
 * Requires a [Finnhub](https://finnhub.io/register) API key (Free, email signup only)
 ```bash
 export FINNHUB_API_KEY="your_key_here"
-python pricewatch.py tsla above 400 alert.wav
+python pricewatcher.py tsla above 400 alert.wav
 ```
 
 ## Requirements
@@ -49,24 +49,24 @@ python pricewatch.py tsla above 400 alert.wav
 ### GUI
 To run the GUI:
 ```
-python pricewatch_gui.py
+python pricewatcher_gui.py
 ```
 
 ## Installation
 ### Clone Repository
 ```bash
-git clone https://github.com/sadsfae/pricewatch.git
-cd pricewatch/src
+git clone https://github.com/sadsfae/pricewatcher.git
+cd pricewatcher/src
 ```
 
 ### Copy .desktop file (optional GUI)
 ```bash
-cat > pricewatch.desktop <<EOF
+cat > pricewatcher.desktop <<EOF
 [Desktop Entry]
 Version=1.0
 Name=Price Watch
 Comment=Monitor crypto and stock prices
-Exec=$(which python3) $(pwd)/pricewatch_gui.py
+Exec=$(which python3) $(pwd)/pricewatcher_gui.py
 Path=$(pwd)/
 Icon=utilities-system-monitor
 Terminal=false
@@ -78,16 +78,16 @@ EOF
 ### Install it to your local applications folder (optional GUI)
 ```bash
 mkdir -p ~/.local/share/applications/
-mv pricewatch.desktop ~/.local/share/applications/
-chmod +x ~/.local/share/applications/pricewatch.desktop
+mv pricewatcher.desktop ~/.local/share/applications/
+chmod +x ~/.local/share/applications/pricewatcher.desktop
 update-desktop-database ~/.local/share/applications/
 ```
 
 ## Screenshots
 ### CLI
-![Pricewatch Mon](image/monitor_price.png)
+![pricewatcher Mon](image/monitor_price.png)
 
-![Pricewatch Vol](image/monitor_vol.png)
+![pricewatcher Vol](image/monitor_vol.png)
 
 ### GUI
-![Pricewatch GUI](image/monitor_gui.png)
+![pricewatcher GUI](image/monitor_gui.png)
