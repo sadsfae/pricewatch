@@ -488,7 +488,7 @@ def main():
 
     print(f"Monitoring {symbol_upper}...")
     if mode == 'vol':
-        target_pct, time_mins = target
+        target_pct, time_mins = target  # type: ignore
         print(
             f"Alert on ±{target_pct:.4f}% change "
             f"within {time_mins} minute{'s' if time_mins != 1 else ''}"
@@ -500,7 +500,7 @@ def main():
 
     try:
         if mode == 'vol':
-            target_pct, time_mins = target
+            target_pct, time_mins = target  # type: ignore
             run_volatility_monitor(
                 symbol_upper,
                 target_pct,
