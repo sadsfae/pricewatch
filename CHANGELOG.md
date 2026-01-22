@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.1.2 (2026-01-22)
+
+### Bug Fixes
+
+- Python-semantic-release needs env ref
+  ([`2e5760b`](https://github.com/sadsfae/goldteeth/commit/2e5760b87ea66492b76d135fff9e06ee6b04480a))
+
+- Repair pypi auth and sync version
+  ([`2c8b1f4`](https://github.com/sadsfae/goldteeth/commit/2c8b1f49794a95a230b501f482eee2c8a625be8e))
+
+
 ## v0.1.1 (2026-01-22)
 
 ### Bug Fixes
@@ -15,6 +26,9 @@
 
 - Sync local version with pypi and update workflow
   ([`f74c75f`](https://github.com/sadsfae/goldteeth/commit/f74c75f1c76c51b937f0b19d0f9633bedca8419e))
+
+- **release**: V0.1.1 [skip ci]
+  ([`f16a5a3`](https://github.com/sadsfae/goldteeth/commit/f16a5a3e663f84937b11c1dbc8bb1308c8fec06e))
 
 
 ## v0.1.0 (2026-01-22)
