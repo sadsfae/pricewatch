@@ -34,6 +34,9 @@ upload_to_pypi = true
 upload_to_release = true
 build_command = "pip install build && python -m build"
 
+[project.scripts]
+goldteeth = "goldteeth:main"
+
 [tool.ruff]
 line-length = 79          # or 78 if you prefer ultra-strict
 indent-width = 4          # usually already matches Python standard
