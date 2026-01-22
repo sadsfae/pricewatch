@@ -1,6 +1,6 @@
 # Goldteeth
 
-[![Flake8 Lint](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml)
+[![Flake8 Lint](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml)[![PyPI version](https://img.shields.io/pypi/v/goldteeth.svg)](https://pypi.org/project/goldteeth/)
 
 Monitors crypto/stock prices & volatility and plays an alert sound when target is reached.
 * It will also send a desktop notification on Linux or MAC OSX.
