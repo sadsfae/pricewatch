@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.3 (2026-01-22)
+
+### Bug Fixes
+
+- Sync git tags to trigger 0.1.8 release
+  ([`3c5ed21`](https://github.com/sadsfae/goldteeth/commit/3c5ed216c933212d78c325588e4c12b26060edc0))
+
+
 ## v0.1.2 (2026-01-22)
 
 ### Bug Fixes
@@ -10,6 +18,11 @@
 
 - Repair pypi auth and sync version
   ([`2c8b1f4`](https://github.com/sadsfae/goldteeth/commit/2c8b1f49794a95a230b501f482eee2c8a625be8e))
+
+### Chores
+
+- **release**: V0.1.2 [skip ci]
+  ([`5262191`](https://github.com/sadsfae/goldteeth/commit/5262191fb3769819c54045331b3c0b2f3fa35f9c))
 
 
 ## v0.1.1 (2026-01-22)
