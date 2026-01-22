@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "goldteeth"
-version = "0.1.2"
+version = "0.1.7"
 description = "Monitors crypto/stock prices or volatility and plays an alert sound when a target is reached"
 readme = "README.md"
 requires-python = ">=3.8"
