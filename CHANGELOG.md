@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.1.1 (2026-01-22)
+
+### Bug Fixes
+
+- Readme
+  ([`7a35f52`](https://github.com/sadsfae/goldteeth/commit/7a35f52760c74e00e7600165213c402fb5c96396))
+
+### Chores
+
+- Sync local version with pypi
+  ([`0f0ffbf`](https://github.com/sadsfae/goldteeth/commit/0f0ffbf2f306e6633d78597f62c849842e755c08))
+
+- Sync local version with pypi and update workflow
+  ([`f74c75f`](https://github.com/sadsfae/goldteeth/commit/f74c75f1c76c51b937f0b19d0f9633bedca8419e))
+
+
 ## v0.1.0 (2026-01-22)
 
 ### Bug Fixes
