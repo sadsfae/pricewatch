@@ -1,12 +1,53 @@
 # CHANGELOG
 
 
+## v0.1.8 (2026-01-22)
+
+### Bug Fixes
+
+- Forcing release of v0.1.8
+  ([`957ab92`](https://github.com/sadsfae/goldteeth/commit/957ab92035de50bad74a8725256793fa9aeb9c8e))
+
+
+## v0.1.7 (2026-01-22)
+
+### Bug Fixes
+
+- Bump again
+  ([`c048607`](https://github.com/sadsfae/goldteeth/commit/c048607ff2711a76fac97e978e0ef3d0907aebd4))
+
+- Bump small readme, see if this works
+  ([`5263f1f`](https://github.com/sadsfae/goldteeth/commit/5263f1fe827c605df6c2f0609b0876a44ef5f9f5))
+
+- Force next release cycle
+  ([`6e11c22`](https://github.com/sadsfae/goldteeth/commit/6e11c2205a559a8d1ce6a06e32964e3985da17e1))
+
+- Fully test pypi + gha automation
+  ([`5921a4f`](https://github.com/sadsfae/goldteeth/commit/5921a4f9392951963d72d951f645d14d45ef3008))
+
+- Readme change to trigger GHA
+  ([`35a9d36`](https://github.com/sadsfae/goldteeth/commit/35a9d36f1602d8c35c4470f3cd84d1bf3f22d841))
+
+- Sync git tags to trigger release
+  ([`706dd3a`](https://github.com/sadsfae/goldteeth/commit/706dd3a419388363d1dffc07b6681302132dbaa2))
+
+### Chores
+
+- **release**: V0.1.7 [skip ci]
+  ([`c524df6`](https://github.com/sadsfae/goldteeth/commit/c524df67be83e27dc3394d264c5c50da14529491))
+
+
 ## v0.1.6 (2026-01-22)
 
 ### Bug Fixes
 
 - Sync git tags to trigger release
   ([`54f7a6c`](https://github.com/sadsfae/goldteeth/commit/54f7a6cce0f4bfddecc7068c3bf0d01c5d17feb8))
+
+### Chores
+
+- **release**: V0.1.6 [skip ci]
+  ([`f51ca43`](https://github.com/sadsfae/goldteeth/commit/f51ca43fac8d325969ef53048edd3451bddb5b8b))
 
 
 ## v0.1.5 (2026-01-22)
