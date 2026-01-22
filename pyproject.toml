@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 79          # or 78 if you prefer ultra-strict
+indent-width = 4          # usually already matches Python standard
+
+[tool.ruff.format]
+# Optional: more control over formatting behavior
+# quote-style = "single"  # or "double", "preserve"
+# skip-magic-trailing-comma = false

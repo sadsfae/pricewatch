@@ -10,29 +10,40 @@ import requests
 import datetime
 
 CRYPTO = {
-    'BTC': 'bitcoin', 'BITCOIN': 'bitcoin',
-    'ETH': 'ethereum', 'ETHEREUM': 'ethereum',
-    'SOL': 'solana', 'SOLANA': 'solana',
-    'DOGE': 'dogecoin', 'DOGECOIN': 'dogecoin',
-    'ADA': 'cardano', 'CARDANO': 'cardano',
-    'XRP': 'ripple', 'RIPPLE': 'ripple',
-    'XMR': 'monero', 'MONERO': 'monero',
-    'LTC': 'litecoin', 'LITECOIN': 'litecoin',
-    'ZEC': 'zcash', 'ZCASH': 'zcash',
-    'ZAN': 'zano', 'ZANO': 'zano',
-    'XLM': 'stellar', 'STELLAR': 'stellar',
+    "BTC": "bitcoin",
+    "BITCOIN": "bitcoin",
+    "ETH": "ethereum",
+    "ETHEREUM": "ethereum",
+    "SOL": "solana",
+    "SOLANA": "solana",
+    "DOGE": "dogecoin",
+    "DOGECOIN": "dogecoin",
+    "ADA": "cardano",
+    "CARDANO": "cardano",
+    "XRP": "ripple",
+    "RIPPLE": "ripple",
+    "XMR": "monero",
+    "MONERO": "monero",
+    "LTC": "litecoin",
+    "LITECOIN": "litecoin",
+    "ZEC": "zcash",
+    "ZCASH": "zcash",
+    "ZAN": "zano",
+    "ZANO": "zano",
+    "XLM": "stellar",
+    "STELLAR": "stellar",
 }
 POLL_INTERVAL = 30
 
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-RESET = '\033[0m'
-BLINK = '\033[5m'
-NO_BLINK = '\033[25m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+BLINK = "\033[5m"
+NO_BLINK = "\033[25m"
 
-BAR_FULL = '█'
-BAR_EMPTY = '░'
+BAR_FULL = "█"
+BAR_EMPTY = "░"
 BAR_WIDTH = 20
 
 current_price = None
@@ -43,15 +54,15 @@ finnhub_symbol = None
 
 
 def get_crypto_price_coingecko(cg_id):
-    cg_key = os.getenv('COINGECKO_API_KEY')
+    cg_key = os.getenv("COINGECKO_API_KEY")
     try:
         url = "https://api.coingecko.com/api/v3/simple/price"
-        params = {'ids': cg_id, 'vs_currencies': 'usd'}
+        params = {"ids": cg_id, "vs_currencies": "usd"}
         if cg_key:
-            params['x_cg_demo_api_key'] = cg_key
+            params["x_cg_demo_api_key"] = cg_key
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
-        return response.json()[cg_id]['usd']
+        return response.json()[cg_id]["usd"]
     except Exception:
         return None
 
@@ -59,25 +70,26 @@ def get_crypto_price_coingecko(cg_id):
 def get_fallback_quote():
     try:
         url = "https://finnhub.io/api/v1/quote"
-        params = {'symbol': finnhub_symbol, 'token': api_key}
+        params = {"symbol": finnhub_symbol, "token": api_key}
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
-        return data.get('c') or data.get('pc')
+        return data.get("c") or data.get("pc")
     except Exception:
         return None
 
 
 def hours_until_market_open():
     import pytz
-    eastern = pytz.timezone('US/Eastern')
+
+    eastern = pytz.timezone("US/Eastern")
     now = datetime.datetime.now(eastern)
     weekday = now.weekday()
     if weekday >= 5:
         days_ahead = 7 - weekday
     else:
         days_ahead = 0
-    next_open = (now.date() + datetime.timedelta(days=days_ahead))
+    next_open = now.date() + datetime.timedelta(days=days_ahead)
     if now.time() >= datetime.time(9, 30):
         next_open += datetime.timedelta(days=1)
     open_dt = datetime.datetime.combine(next_open, datetime.time(9, 30))
@@ -90,10 +102,10 @@ def hours_until_market_open():
 def on_message(ws, message):
     global current_price
     data = json.loads(message)
-    if 'data' in data:
-        for trade in data['data']:
+    if "data" in data:
+        for trade in data["data"]:
             with price_lock:
-                current_price = trade['p']
+                current_price = trade["p"]
 
 
 def on_error(ws, error):
@@ -110,13 +122,14 @@ def on_open(ws, symbol):
 
 def start_websocket(symbol, key):
     import websocket
+
     ws_url = f"wss://ws.finnhub.io?token={key}"
     ws = websocket.WebSocketApp(
         ws_url,
         on_open=lambda ws: on_open(ws, symbol),
         on_message=on_message,
         on_error=on_error,
-        on_close=on_close
+        on_close=on_close,
     )
     global ws_thread
     ws_thread = threading.Thread(target=ws.run_forever)
@@ -153,29 +166,26 @@ def play_alert(wav, player_cmd):
     subprocess.Popen(
         player_cmd + [wav],
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        stderr=subprocess.DEVNULL,
     )
 
 
 def send_notification(title, message):
     """Send a desktop notification using notify-send or osascript."""
-    if shutil.which('notify-send'):
+    if shutil.which("notify-send"):
         subprocess.Popen(
-            ['notify-send', title, message],
+            ["notify-send", title, message],
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.DEVNULL,
         )
-    elif shutil.which('osascript'):
+    elif shutil.which("osascript"):
         safe_msg = message.replace('"', '\\"')
         safe_title = title.replace('"', '\\"')
-        script = (
-            f'display notification "{safe_msg}" '
-            f'with title "{safe_title}"'
-        )
+        script = f'display notification "{safe_msg}" with title "{safe_title}"'
         subprocess.Popen(
-            ['osascript', '-e', script],
+            ["osascript", "-e", script],
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.DEVNULL,
         )
 
 
@@ -237,7 +247,7 @@ def run_volatility_monitor(
     wav,
     player_cmd,
     fetch_price,
-    is_crypto=False
+    is_crypto=False,
 ):
     """Run the volatility monitoring loop."""
     price_history, min_prices, max_prices = deque(), deque(), deque()
@@ -246,17 +256,12 @@ def run_volatility_monitor(
     while True:
         price = fetch_price()
         now = time.monotonic()
-        time_str = time.strftime('%H:%M:%S')
+        time_str = time.strftime("%H:%M:%S")
 
         if price is not None and price > 0:
             cutoff = now - (time_mins * 60)
             update_deques(
-                now,
-                price,
-                price_history,
-                min_prices,
-                max_prices,
-                cutoff
+                now, price, price_history, min_prices, max_prices, cutoff
             )
 
             has_enough_data = len(price_history) >= 2
@@ -264,15 +269,10 @@ def run_volatility_monitor(
             if triggered:
                 print(f"{symbol}: ${price:,.2f} ({time_str})")
             elif not has_enough_data:
-                print(
-                    f"{symbol}: ${price:,.2f} (warming up...) ({time_str})"
-                )
+                print(f"{symbol}: ${price:,.2f} (warming up...) ({time_str})")
             else:
                 alert, swing_pct = check_volatility(
-                    price_history,
-                    min_prices,
-                    max_prices,
-                    target_pct
+                    price_history, min_prices, max_prices, target_pct
                 )
 
                 if alert:
@@ -313,13 +313,7 @@ def run_volatility_monitor(
 
 
 def run_price_monitor(
-    symbol,
-    mode,
-    target,
-    wav,
-    player_cmd,
-    fetch_price,
-    is_crypto=False
+    symbol, mode, target, wav, player_cmd, fetch_price, is_crypto=False
 ):
     """Run the price threshold monitoring loop."""
     triggered = False
@@ -328,7 +322,7 @@ def run_price_monitor(
 
     while True:
         price = fetch_price()
-        time_str = time.strftime('%H:%M:%S')
+        time_str = time.strftime("%H:%M:%S")
         blink_state = not blink_state
 
         if price is not None:
@@ -366,13 +360,10 @@ def run_price_monitor(
             print(f"{symbol}: ${price:,.2f} ({time_str}) {status}")
 
             crossed = crossed_threshold(
-                price,
-                last_price,
-                target,
-                mode == 'above'
+                price, last_price, target, mode == "above"
             )
             if not triggered and crossed:
-                if mode == 'above':
+                if mode == "above":
                     msg = (
                         f"{symbol} BROKE ABOVE ${target:,}! "
                         f"Price: ${price:,.2f}"
@@ -430,13 +421,11 @@ def parse_args():
     if not os.path.isfile(wav):
         sys.exit(f"WAV not found: {wav}")
 
-    if mode == 'vol':
-        if '-' not in target_str:
-            sys.exit(
-                "Volatility format: <percent>-<minutes> (e.g., 0.001-1)"
-            )
+    if mode == "vol":
+        if "-" not in target_str:
+            sys.exit("Volatility format: <percent>-<minutes> (e.g., 0.001-1)")
         try:
-            pct_str, mins_str = target_str.split('-', 1)
+            pct_str, mins_str = target_str.split("-", 1)
             target_pct = float(pct_str)
             time_mins = int(mins_str)
         except ValueError:
@@ -445,7 +434,7 @@ def parse_args():
             sys.exit("Percent and minutes must be > 0")
         return symbol, mode, (target_pct, time_mins), wav
 
-    if mode not in ('above', 'below'):
+    if mode not in ("above", "below"):
         sys.exit("Mode must be 'above', 'below', or 'vol'")
     try:
         target = float(target_str)
@@ -466,10 +455,11 @@ def main():
     is_crypto = bool(cg_id)
 
     if is_crypto:
+
         def fetch_price():
             return get_crypto_price_coingecko(cg_id)
     else:
-        api_key = os.getenv('FINNHUB_API_KEY')
+        api_key = os.getenv("FINNHUB_API_KEY")
         if not api_key:
             sys.exit("Error: FINNHUB_API_KEY environment variable not set")
 
@@ -487,19 +477,19 @@ def main():
             return get_price()
 
     print(f"Monitoring {symbol_upper}...")
-    if mode == 'vol':
+    if mode == "vol":
         target_pct, time_mins = target  # type: ignore
         print(
             f"Alert on ±{target_pct:.4f}% change "
             f"within {time_mins} minute{'s' if time_mins != 1 else ''}"
         )
     else:
-        direction = "above or at" if mode == 'above' else "below or at"
+        direction = "above or at" if mode == "above" else "below or at"
         print(f"Alert when price goes {direction} ${target:,}")
     print("Press Ctrl+C to stop monitoring.\n")
 
     try:
-        if mode == 'vol':
+        if mode == "vol":
             target_pct, time_mins = target  # type: ignore
             run_volatility_monitor(
                 symbol_upper,
@@ -508,7 +498,7 @@ def main():
                 wav,
                 player_cmd,
                 fetch_price,
-                is_crypto
+                is_crypto,
             )
         else:
             run_price_monitor(
@@ -518,7 +508,7 @@ def main():
                 wav,
                 player_cmd,
                 fetch_price,
-                is_crypto
+                is_crypto,
             )
     except KeyboardInterrupt:
         print("\nStopped.")
