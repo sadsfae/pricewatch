@@ -44,7 +44,7 @@ python goldteeth.py tsla above 400 alert.wav
    * `requests` or `python3-requests`
    * `pytz` or `python3-pytz` (Stocks only)
    * `websockets` or `python3-websockets` (Stocks only)
-- mpv or mplayer (playing alerts)
+- mpv or mplayer (audio alerts)
 
 ### GUI
 To run the GUI:
