@@ -10,10 +10,10 @@ import signal
 import shutil
 
 
-class PricewatcherGUI:
+class goldteethGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Pricewatcher GUI")
+        self.root.title("goldteeth GUI")
         self.root.geometry("800x600")
 
         self.process = None
@@ -230,7 +230,7 @@ class PricewatcherGUI:
         wav = self.wav_var.get()
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, "pricewatcher.py")
+        script_path = os.path.join(script_dir, "goldteeth.py")
 
         if not os.path.exists(script_path):
             messagebox.showerror("Error", f"Script not found: {script_path}")
@@ -302,5 +302,5 @@ class PricewatcherGUI:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = PricewatcherGUI(root)
+    app = goldteethGUI(root)
     root.mainloop()

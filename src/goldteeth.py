@@ -400,7 +400,7 @@ def run_price_monitor(
 
 def parse_args():
     if len(sys.argv) != 5:
-        print("Usage: pricewatcher.py <symbol> <mode> <target> <wav>")
+        print("Usage: goldteeth.py <symbol> <mode> <target> <wav>")
         print("")
         print("Modes:")
         print("  above <price>        Alert when price rises to target")
