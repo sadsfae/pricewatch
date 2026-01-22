@@ -71,7 +71,7 @@ cd goldteeth/src
 cat > goldteeth.desktop <<EOF
 [Desktop Entry]
 Version=1.0
-Name=Price Watch
+Name=Goldteeth
 Comment=Monitor crypto and stock prices
 Exec=$(which python3) $(pwd)/goldteeth_gui.py
 Path=$(pwd)/
