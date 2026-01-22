@@ -59,6 +59,9 @@ git clone https://github.com/sadsfae/pricewatcher.git
 cd pricewatcher/src
 ```
 
+## Installation via Pip
+TBD
+
 ### Copy .desktop file (optional GUI)
 ```bash
 cat > pricewatcher.desktop <<EOF
