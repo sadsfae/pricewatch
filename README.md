@@ -66,8 +66,9 @@ pip install goldteeth
 ```
 
 ### Usage with Pip
+* `alert.wav` is included but you can pass your own audio file.
 ```bash
-goldteeth
+goldteeth btc below 88000 alert.wav
 ```
 
 ## Installation via Repository
