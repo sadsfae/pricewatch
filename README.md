@@ -1,42 +1,48 @@
 # Goldteeth
 
-[![Flake8 Lint](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml)[![PyPI version](https://img.shields.io/pypi/v/goldteeth.svg)](https://pypi.org/project/goldteeth/)
+[![Flake8 Lint](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml/badge.svg)](https://github.com/sadsfae/goldteeth/actions/workflows/flake8.yml)
+[![PyPI version](https://img.shields.io/pypi/v/goldteeth.svg)](https://pypi.org/project/goldteeth/)
 
-Monitors crypto/stock prices & volatility and plays an alert sound when target is reached.
+Monitors crypto/stock prices & volatility and plays an alert sound when a
+target is reached.
+
 * It will also send a desktop notification on Linux or MAC OSX.
 * Run via `python` in a terminal or use the optional GUI.
 
 > [!NOTE]
-> Stock prices utilize [Finnhub](https://finnhub.io/register) free API (email sign-up required)
+> Stock prices utilize [Finnhub](https://finnhub.io/register) free API
+> (email sign-up required)
 >
-> Crypto prices utilize the CoinGecko open API but may be rate limited occasionally.
+> Crypto prices utilize the CoinGecko open API but may be rate limited
+> occasionally.
 >
-> (optional) If you want to use a CoinGecko API key use `export COINGECKO_API_KEY="your_API_key"`
+> (optional) If you want to use a CoinGecko API key use
+> `export COINGECKO_API_KEY="your_API_key"`
 
 ## Usage
 
-```
-python goldteeth.py <symbol> <mode> <target> <wav>
+```bash
+python src/goldteeth_cli.py <symbol> <mode> <target> <wav>
 ```
 
-### Price targets
-```
-python goldteeth.py btc above 100000 alert.wav
-python goldteeth.py eth below 3000 alert.wav
+### Price Targets
+```bash
+python src/goldteeth_cli.py btc above 100000 alert.wav
+python src/goldteeth_cli.py eth below 3000 alert.wav
 ```
 
 ### Volatility
-```
-python goldteeth.py sol vol 10-5 alert.wav    # 10% move in 5 mins
-python goldteeth.py doge vol 5-15 alert.wav   # 5% move in 15 mins
-python goldteeth.py tsla vol 5-10 alert.wav   # 5% move in 10 mins (needs FINNHUB_API_KEY)
+```bash
+python src/goldteeth_cli.py sol vol 10-5 src/goldteeth/alert.wav  # 10% move in 5 mins
+python src/goldteeth_cli.py doge vol 5-15 src/goldteeth/alert.wav  # 5% move in 15 mins
+python src/goldteeth_cli.py tsla vol 5-10 src/goldteeth/alert.wav  # 5% move in 10 mins
 ```
 
 ### Stocks
-* Requires a [Finnhub](https://finnhub.io/register) API key (Free, email signup only)
+* Requires a [Finnhub](https://finnhub.io/register) API key (free, email sign-up)
 ```bash
 export FINNHUB_API_KEY="your_key_here"
-python goldteeth.py tsla above 400 alert.wav
+python src/goldteeth_cli.py tsla above 400 src/goldteeth/alert.wav
 ```
 
 ## Requirements
@@ -47,15 +53,14 @@ python goldteeth.py tsla above 400 alert.wav
 - mpv or mplayer (audio alerts)
 
 ### GUI
-To run the GUI:
-```
-python goldteeth_gui.py
+```bash
+python src/goldteeth_gui.py
 ```
 
 ## Installation via Pip
 ```bash
-python -m venv goldteeth && cd !$
-. bin/activate
+python -m venv goldteeth
+. !$/bin/activate
 pip install goldteeth
 ```
 
@@ -65,12 +70,10 @@ goldteeth
 ```
 
 ## Installation via Repository
-### Clone Repository
 ```bash
-git clone https://github.com/sadsfae/goldteeth.git
+git clone [https://github.com/sadsfae/goldteeth.git](https://github.com/sadsfae/goldteeth.git)
 cd goldteeth/src
 ```
-
 ### Copy .desktop file (optional GUI)
 ```bash
 cat > goldteeth.desktop <<EOF
@@ -78,7 +81,7 @@ cat > goldteeth.desktop <<EOF
 Version=1.0
 Name=Goldteeth
 Comment=Monitor crypto and stock prices
-Exec=$(which python3) $(pwd)/goldteeth_gui.py
+Exec=$(which python3) $(pwd)/src/goldteeth_gui.py
 Path=$(pwd)/
 Icon=utilities-system-monitor
 Terminal=false
@@ -87,7 +90,7 @@ Categories=Utility;Finance;
 EOF
 ```
 
-### Install it to your local applications folder (optional GUI)
+### Install it to local apps folder (optional GUI)
 ```bash
 mkdir -p ~/.local/share/applications/
 mv goldteeth.desktop ~/.local/share/applications/
@@ -96,6 +99,7 @@ update-desktop-database ~/.local/share/applications/
 ```
 
 ## Screenshots
+
 ### CLI
 ![goldteeth Mon](image/monitor_price.png)
 

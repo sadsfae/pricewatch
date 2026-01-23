@@ -398,9 +398,14 @@ def run_price_monitor(
         time.sleep(POLL_INTERVAL)
 
 
+def get_default_wav_path():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_dir, "alert.wav")
+
+
 def parse_args():
-    if len(sys.argv) != 5:
-        print("Usage: goldteeth.py <symbol> <mode> <target> <wav>")
+    if len(sys.argv) not in (4, 5):
+        print("Usage: goldteeth <symbol> <mode> <target> [wav]")
         print("")
         print("Modes:")
         print("  above <price>        Alert when price rises to target")
@@ -408,6 +413,7 @@ def parse_args():
         print("  vol <pct>-<mins>     Alert on volatility")
         print("")
         print("Examples:")
+        print("  btc above 100000")
         print("  btc above 100000 alert.wav")
         print("  slv below 61 alert.wav")
         print("  tsla vol 0.5-5 alert.wav")
@@ -416,7 +422,11 @@ def parse_args():
     symbol = sys.argv[1]
     mode = sys.argv[2].lower()
     target_str = sys.argv[3]
-    wav = sys.argv[4]
+
+    if len(sys.argv) == 5:
+        wav = sys.argv[4]
+    else:
+        wav = get_default_wav_path()
 
     if not os.path.isfile(wav):
         sys.exit(f"WAV not found: {wav}")
