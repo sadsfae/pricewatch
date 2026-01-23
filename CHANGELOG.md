@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v1.1.0 (2026-01-23)
+
+### Features
+
+- Add .gitignore
+  ([`a618fdd`](https://github.com/sadsfae/goldteeth/commit/a618fdd1e4c8c29e964075728814307802fcb230))
+
+
 ## v1.0.0 (2026-01-23)
+
+### Chores
+
+- **release**: V1.0.0 [skip ci]
+  ([`1e96163`](https://github.com/sadsfae/goldteeth/commit/1e9616359df24bb6c5d1da62d0364fed4f53189b))
 
 ### Features
 
