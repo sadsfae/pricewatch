@@ -78,7 +78,17 @@ class goldteethGUI:
         ttk.Label(self.main_frame, text="Alert WAV file:").grid(
             row=5, column=0, sticky=tk.W
         )
-        self.wav_var = tk.StringVar(value="alert.wav")
+
+        # Updated to look into the package folder
+        default_wav = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "goldteeth",
+            "alert.wav",
+        )
+        if not os.path.exists(default_wav):
+            default_wav = "alert.wav"
+
+        self.wav_var = tk.StringVar(value=default_wav)
         ttk.Entry(self.main_frame, textvariable=self.wav_var, width=30).grid(
             row=5, column=1
         )
@@ -230,7 +240,8 @@ class goldteethGUI:
         wav = self.wav_var.get()
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, "goldteeth.py")
+        # Update: Target the CLI runner, not the package init
+        script_path = os.path.join(script_dir, "goldteeth_cli.py")
 
         if not os.path.exists(script_path):
             messagebox.showerror("Error", f"Script not found: {script_path}")
