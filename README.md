@@ -54,9 +54,14 @@ python goldteeth_gui.py
 
 ## Installation via Pip
 ```bash
-python -m venv goldteeth
-. goldteeth/bin/activate
+python -m venv goldteeth && cd !$
+. bin/activate
 pip install goldteeth
+```
+
+### Usage with Pip
+```bash
+goldteeth
 ```
 
 ## Installation via Repository

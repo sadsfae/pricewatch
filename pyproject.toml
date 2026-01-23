@@ -30,8 +30,11 @@ Issues = "https://github.com/sadsfae/goldteeth/issues"
 [project.scripts]
 goldteeth = "goldteeth:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+py-modules = ["goldteeth"]
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.semantic_release]
 branch = "master"
