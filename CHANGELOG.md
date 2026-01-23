@@ -1,12 +1,25 @@
 # CHANGELOG
 
 
+## v0.1.9 (2026-01-23)
+
+### Bug Fixes
+
+- Forcing release of v0.1.9
+  ([`72491d8`](https://github.com/sadsfae/goldteeth/commit/72491d8356d94972214cfe1756e77411212de827))
+
+
 ## v0.1.8 (2026-01-22)
 
 ### Bug Fixes
 
 - Forcing release of v0.1.8
   ([`957ab92`](https://github.com/sadsfae/goldteeth/commit/957ab92035de50bad74a8725256793fa9aeb9c8e))
+
+### Chores
+
+- **release**: V0.1.8 [skip ci]
+  ([`96bab02`](https://github.com/sadsfae/goldteeth/commit/96bab028733844c0c3c817b75003173942237076))
 
 
 ## v0.1.7 (2026-01-22)
