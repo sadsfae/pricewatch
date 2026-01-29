@@ -219,7 +219,7 @@ class goldteethGUI:
                 clean_message = self.strip_ansi(message)
 
                 if "!!!" in clean_message:
-                    self.send_notification("Price Watch Alert", clean_message)
+                    self.send_notification("Gold Teeth Alert", clean_message)
 
                 self.console.config(state="normal")
                 self.console.insert(tk.END, clean_message + "\n")

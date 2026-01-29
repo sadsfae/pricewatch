@@ -285,7 +285,7 @@ def run_volatility_monitor(
                         f"high ${max_p:,.2f})"
                     )
                     print(f"\n{RED}!!! {msg} !!!{RESET}")
-                    send_notification("Price Watch Alert", msg)
+                    send_notification("Gold Teeth Alert", msg)
 
                     print(
                         f"    Starting endless alert sound... "
@@ -376,7 +376,7 @@ def run_price_monitor(
                     )
                     print(f"\n!!! {msg} !!!")
 
-                send_notification("Price Watch Alert", msg)
+                send_notification("Gold Teeth Alert", msg)
                 print(
                     f"    Starting endless alert sound... "
                     f"(stop with: killall {player_cmd[0]})\n"
